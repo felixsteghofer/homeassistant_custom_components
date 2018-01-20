@@ -1,8 +1,10 @@
 import asyncio
 import logging
+import voluptuous as vol
 import homeassistant.loader as loader
+import homeassistant.helpers.config_validation as cv
 
-from homeassistant.const import CONF_NAME
+from homeassistant.const import (CONF_NAME, CONF_WHITELIST, CONF_BLACKLIST)
 from homeassistant.components.camera.mjpeg import (
     CONF_MJPEG_URL, CONF_STILL_IMAGE_URL, MjpegCamera)
 
@@ -13,19 +15,41 @@ DOMAIN = 'shinobi'
 
 shinobi = loader.get_component('shinobi')
 
+CONFIG_SCHEMA = vol.Schema({
+    DOMAIN: vol.Schema({
+        vol.Optional(CONF_WHITELIST): cv.ensure_list,
+        vol.Optional(CONF_BLACKLIST): cv.ensure_list
+    })
+}, extra=vol.ALLOW_EXTRA)
 
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    monitors = shinobi.get_all_started_monitors()
-    cameras = []
+    all_monitors = shinobi.get_all_started_monitors()
 
-    _LOGGER.debug(config)
-    
-    if not monitors:
+    if not all_monitors:
         _LOGGER.warning('No active monitors found')
         return
 
-    for monitor in monitors:
+    filtered_monitors = []
+
+    whitelist = config.get(CONF_WHITELIST, [])
+    blacklist = config.get(CONF_BLACKLIST, [])
+
+    if whitelist and len(whitelist) > 0:
+        _LOGGER.debug('Applying whitelist: ' + str(whitelist))
+        filtered_monitors = [m for m in all_monitors if m['name'] in whitelist]
+    elif blacklist and len(blacklist) > 0:
+        _LOGGER.debug('Applying blacklist: ' + str(blacklist))
+        filtered_monitors = [m for m in all_monitors if m['name'] not in blacklist]
+    else:
+        _LOGGER.debug('No white- or blacklist applied')
+        filtered_monitors = all_monitors
+    
+    cameras = []    
+
+    _LOGGER.debug('Filtered monitors: {}'.format(str([monitor['name'] for monitor in filtered_monitors])))
+
+    for monitor in filtered_monitors:
         device_info = {
             CONF_NAME: monitor['name'],
             CONF_MJPEG_URL: shinobi.monitor_stream_url(monitor['mid']),
