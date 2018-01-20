@@ -26,14 +26,12 @@ camera:
 …
 ```
 
-At the moment, all configured and activated cameras (in state, `Record` or `Watch-only`, see https://shinobi.video/docs/settings) are fetched and added to Home Assistant as `MjpegCamera`. Please note that I couldn't get the actual Mjpeg stream to work in general using other software so this is also not working in HA for now. The preview with still images is working perfectly though.
-
+At the moment, all configured and activated cameras (in state, `Record` or `Watch-only`, see https://shinobi.video/docs/settings) are fetched and added to Home Assistant as `MjpegCamera`.
 No additional packages have to be installed.
 
 ## TODO
 
-- get the (mjpeg-) stream to work, also figure out which camera platform is working best for this (Shinobi allows to switch between different stream output configs)
-- allow filtering of which monitors/cams to add to HA
+- figure out which camera platform is working best for this (Shinobi allows to switch between different stream output configs)
 - add movement detection as (binary?) sensors
 - add ptz control (as switches? I have not yet seen a good solution in HA, anybody who can help please drop some lines)
 - …
