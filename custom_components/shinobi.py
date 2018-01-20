@@ -117,7 +117,7 @@ def set_monitor_state(monitor_id, mode):
 
 def monitor_stream_url(monitor_id):
     """Get the stream url. See https://shinobi.video/docs/api#content-embedding-streams for more information."""
-    return SHINOBI['server_origin'] + '/' + SHINOBI['api_key'] + '/embed/' + SHINOBI['group_key'] + '/' + monitor_id
+    return SHINOBI['server_origin'] + '/' + SHINOBI['api_key'] + '/mjpeg/' + SHINOBI['group_key'] + '/' + monitor_id
 
 
 def monitor_still_url(monitor_id):
