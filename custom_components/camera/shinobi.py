@@ -5,8 +5,8 @@ import homeassistant.loader as loader
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.const import (CONF_NAME, CONF_WHITELIST, CONF_BLACKLIST)
-from homeassistant.components.camera.mjpeg import (
-    CONF_MJPEG_URL, CONF_STILL_IMAGE_URL, MjpegCamera)
+from homeassistant.components.camera import PLATFORM_SCHEMA
+from homeassistant.components.camera.mjpeg import (CONF_MJPEG_URL, CONF_STILL_IMAGE_URL, MjpegCamera)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,12 +15,11 @@ DOMAIN = 'shinobi'
 
 shinobi = loader.get_component('shinobi')
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN: vol.Schema({
-        vol.Optional(CONF_WHITELIST): cv.ensure_list,
-        vol.Optional(CONF_BLACKLIST): cv.ensure_list
-    })
-}, extra=vol.ALLOW_EXTRA)
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+    vol.Optional(CONF_WHITELIST, default=[]): cv.ensure_list,
+    vol.Optional(CONF_BLACKLIST, default=[]): cv.ensure_list
+})
+
 
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
@@ -32,13 +31,13 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     filtered_monitors = []
 
-    whitelist = config.get(CONF_WHITELIST, [])
-    blacklist = config.get(CONF_BLACKLIST, [])
+    whitelist = config.get(CONF_WHITELIST)
+    blacklist = config.get(CONF_BLACKLIST)
 
-    if whitelist and len(whitelist) > 0:
+    if len(whitelist) > 0:
         _LOGGER.debug('Applying whitelist: ' + str(whitelist))
         filtered_monitors = [m for m in all_monitors if m['name'] in whitelist]
-    elif blacklist and len(blacklist) > 0:
+    elif len(blacklist) > 0:
         _LOGGER.debug('Applying blacklist: ' + str(blacklist))
         filtered_monitors = [m for m in all_monitors if m['name'] not in blacklist]
     else:
@@ -88,7 +87,7 @@ class ShinobiCamera(MjpegCamera):
             _LOGGER.warning('Could not get status for monitor {}'.format(self._monitor_id))
             return
         _LOGGER.debug('Monitor {} is in status {}'.format(self._monitor_id, status_response['mode']))
-        self._is_recording = status_response.get('status') == shinobi.SHINOBI_CAM_RECORDING
+        self._is_recording = status_response.get('status') == shinobi.SHINOBI_CAM_STATE['RECORDING']
 
     @property
     def is_recording(self):

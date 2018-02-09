@@ -1,30 +1,31 @@
 import asyncio
 import logging
 import requests
-import json
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
-from homeassistant.const import (
-    CONF_HOST, CONF_API_KEY, CONF_SSL)
+from homeassistant.const import (CONF_HOST, CONF_API_KEY, CONF_SSL)
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'shinobi'
-DEFAULT_TIMEOUT = 10
 DEFAULT_SSL = False
+DEFAULT_TIMEOUT = 10
 
-SHINOBI_CAM_DISABLED = 'stop'
-SHINOBI_CAM_WATCHING = 'start'
-SHINOBI_CAM_RECORDING = 'record'
+SHINOBI = {}
+
+SHINOBI_CAM_STATE = {
+    'DISABLED': 'stop',
+    'RECORDING': 'record',
+    'WATCHING': 'start'
+}
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Required(CONF_HOST): cv.string,
         vol.Required(CONF_API_KEY): cv.string,
         vol.Required('group_key'): cv.string,
-        vol.Optional(CONF_SSL, default=DEFAULT_SSL): cv.boolean,
-        vol.Optional('monitors', default=[]): cv.ensure_list
+        vol.Optional(CONF_SSL, default=DEFAULT_SSL): cv.boolean
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -33,44 +34,44 @@ CONFIG_SCHEMA = vol.Schema({
 def async_setup(hass, config):
 
     global SHINOBI
-    SHINOBI = {}
 
     conf = config[DOMAIN]
-    if conf[CONF_SSL]:
+
+    if conf.get(CONF_SSL):
         schema = 'https'
     else:
         schema = 'http'
-    
-    server_origin = '{}://{}'.format(schema, conf[CONF_HOST])
-    
+
+    server_origin = '{}://{}'.format(schema, conf.get(CONF_HOST))
+
     SHINOBI['server_origin'] = server_origin
-    SHINOBI['api_key'] = conf.get(CONF_API_KEY, None)
-    SHINOBI['group_key'] = conf.get('group_key', None)
-    SHINOBI['monitors'] = conf.get('monitors')
+    SHINOBI['api_key'] = conf.get(CONF_API_KEY)
+    SHINOBI['group_key'] = conf.get('group_key')
 
-    hass.data[DOMAIN] = SHINOBI
-
-    # unfortunately, the api does not return error codes. The only way to check if the credentials are working is to check the response of an (arbitrary) request (e.g. get all monitors)
+    # Unfortunately, the api does not return error codes. The only way to 
+    # check if the credentials are working is to check the response of an 
+    # (arbitrary) request (e.g. to get all monitors).
     try:
         check_creds_response = get_all_started_monitors()
     except:
         return False
     
-    # expected response contains a list with activated monitors (or an empty list)
+    # Expected response contains a list with activated monitors (or an empty
+    #  list if no monitors activated).
     if isinstance(check_creds_response, list):
         return True
     else:
-        # response payload contains ok: false if authentication has not been successful
+        # Response payload contains {"ok": "false",…} if authentication has not been successful.
         if not check_creds_response.ok:
             _LOGGER.error('Wrong api_key or non existing group_key provided')
         else:
-            _LOGGER.error('Unknown error occured while retrieving monitors')
+            _LOGGER.error('Unknown error occurred while retrieving monitors')
         
         return False
 
 
 def _shinobi_request(api_path, method='get', data=None):
-    """Perform a Shinobi request."""
+    """Perform a generic request to the Shinobi API."""
 
     api_base = SHINOBI['server_origin'] + '/' + SHINOBI['api_key']
 
@@ -81,7 +82,7 @@ def _shinobi_request(api_path, method='get', data=None):
         response = req.json()
     except ValueError:
         _LOGGER.exception('JSON decode exception caught while attempting to '
-                        'decode "{}"', req.text)
+                          'decode "{}"'.format(req.text))
     return response
 
 
@@ -91,14 +92,11 @@ def get_all_started_monitors():
 
     get_monitors_path = '/smonitor/' + SHINOBI['group_key']
 
-    response = _shinobi_request(get_monitors_path)
+    monitors = _shinobi_request(get_monitors_path)
 
-    # TODO is it necessary to save monitors globally in SHINOBI?
-    SHINOBI['monitors'] = response
+    _LOGGER.debug('Shinobi returned {} monitors: {}'.format(str(len(monitors)), str([monitor['name'] for monitor in monitors])))
 
-    _LOGGER.debug('Shinobi returned {} monitors: {}'.format(str(len(SHINOBI['monitors'])), str([monitor['name'] for monitor in SHINOBI['monitors']])))
-
-    return SHINOBI['monitors']
+    return monitors
 
 
 def get_monitor_state(monitor_id):
@@ -108,9 +106,9 @@ def get_monitor_state(monitor_id):
 
 
 def set_monitor_state(monitor_id, mode):
-    """Get the state of a monitor."""
-    if not (mode == SHINOBI_CAM_DISABLED or mode == SHINOBI_CAM_WATCHING or mode == SHINOBI_CAM_RECORDING):
-        raise ValueError('monitor state must be either {}, {} or {}'.format(SHINOBI_CAM_DISABLED, SHINOBI_CAM_WATCHING, SHINOBI_CAM_RECORDING))
+    """Set the state of a monitor."""
+    if not (mode in SHINOBI_CAM_STATE.values()):
+        raise ValueError('Monitor state must be one of the following values {}.'.format(SHINOBI_CAM_STATE.values()))
     api_path = '/monitor/{}/{}'.format(SHINOBI['group_key'], monitor_id)
     return _shinobi_request(api_path)
 
@@ -121,5 +119,5 @@ def monitor_stream_url(monitor_id):
 
 
 def monitor_still_url(monitor_id):
-    """Get the url of still jpg images. Snapshots must be enabled in cam settings, see https://shinobi.video/docs/api#content-get-streams"""
+    """Get the url of still jpg images. Snapshots must be enabled in cam settings, see https://shinobi.video/docs/api#content-get-streams."""
     return SHINOBI['server_origin'] + '/' + SHINOBI['api_key'] + '/jpeg/' + SHINOBI['group_key'] + '/' + monitor_id + '/s.jpg'
