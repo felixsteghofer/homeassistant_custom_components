@@ -13,16 +13,19 @@ _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = ['shinobi']
 DOMAIN = 'shinobi'
 
-shinobi = loader.get_component('shinobi')
-
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_WHITELIST, default=[]): cv.ensure_list,
     vol.Optional(CONF_BLACKLIST, default=[]): cv.ensure_list
 })
 
+shinobi = None
+
 
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+    global shinobi
+    shinobi = hass.components.shinobi
+
     all_monitors = shinobi.get_all_started_monitors()
 
     if not all_monitors:
@@ -54,7 +57,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
             CONF_MJPEG_URL: shinobi.monitor_stream_url(monitor['mid']),
             CONF_STILL_IMAGE_URL: shinobi.monitor_still_url(monitor['mid'])
         }
-        cameras.append(ShinobiCamera(hass, device_info, monitor))
+        cameras.append(ShinobiCamera(hass, shinobi, device_info, monitor))
 
     if not cameras:
         _LOGGER.warning('No active cameras found')
@@ -66,9 +69,10 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 class ShinobiCamera(MjpegCamera):
     """Representation of a Shinobi Monitor Stream."""
 
-    def __init__(self, hass, device_info, monitor):
+    def __init__(self, hass, shinobi, device_info, monitor):
         """Initialize as a subclass of MjpegCamera."""
         super().__init__(hass, device_info)
+        self.shinobi = shinobi
         self._monitor_id = monitor['mid']
         self._is_recording = None
 
@@ -81,13 +85,13 @@ class ShinobiCamera(MjpegCamera):
         """Update our recording state from the Shinobi API."""
         _LOGGER.debug('Updating camera state for monitor {}'.format(self._monitor_id))
 
-        status_response = shinobi.get_monitor_state(self._monitor_id)
+        status_response = self.shinobi.get_monitor_state(self._monitor_id)
 
         if not status_response:
             _LOGGER.warning('Could not get status for monitor {}'.format(self._monitor_id))
             return
         _LOGGER.debug('Monitor {} is in status {}'.format(self._monitor_id, status_response['mode']))
-        self._is_recording = status_response.get('status') == shinobi.SHINOBI_CAM_STATE['RECORDING']
+        self._is_recording = status_response.get('status') == self.shinobi.SHINOBI_CAM_STATE['RECORDING']
 
     @property
     def is_recording(self):

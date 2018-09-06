@@ -6,7 +6,7 @@
 
 [Shinobi](https://shinobi.video/) is an open source cctv solution. 
 
-To enable this component, first copy `custom_components/` inside your Home Assistant config directory and add the Shinobi component and platform, for example in `configuration.yaml`. See https://github.com/moeiscool/Shinobi/wiki/API-Access on how to get your `api_key` and `group_key`. The `ssl` param is optional and defaults to `false`. The white- and blacklist is also optional and defaults to all active monitors being considered. Only one filtering method can be applied at the same time. For now, the name assigned in Shinobi is used to filter cams.
+To enable this component, first copy `custom_components/` inside your Home Assistant config directory and add the Shinobi component and platform, for example in `configuration.yaml`. See https://shinobi.video/docs/api on how to get your `api_key` and `group_key`. The `ssl` param is optional and defaults to `false`. The white- and blacklist is also optional and defaults to all active monitors being considered. Only one filtering method can be applied at the same time. For now, the name assigned in Shinobi is used to filter cams.
 
 ```
 …
