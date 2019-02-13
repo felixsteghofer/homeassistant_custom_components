@@ -71,7 +71,7 @@ class ShinobiCamera(MjpegCamera):
 
     def __init__(self, hass, shinobi, device_info, monitor):
         """Initialize as a subclass of MjpegCamera."""
-        super().__init__(hass, device_info)
+        super().__init__(device_info)
         self.shinobi = shinobi
         self._monitor_id = monitor['mid']
         self._is_recording = None
