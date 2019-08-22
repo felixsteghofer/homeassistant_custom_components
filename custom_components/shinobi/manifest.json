@@ -1,0 +1,8 @@
+{
+  "domain": "shinobi",
+  "name": "shinobi",
+  "documentation": "https://www.home-assistant.io/components/shinobi",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": []
+}

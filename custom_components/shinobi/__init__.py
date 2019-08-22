@@ -1,3 +1,4 @@
+"""Shinobi Camera Module for shinobi CCTV"""
 import asyncio
 import logging
 import requests
