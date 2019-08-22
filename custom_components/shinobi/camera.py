@@ -6,7 +6,7 @@ import homeassistant.helpers.config_validation as cv
 
 from homeassistant.const import (CONF_NAME, CONF_WHITELIST, CONF_BLACKLIST)
 from homeassistant.components.camera import PLATFORM_SCHEMA
-from homeassistant.components.camera.mjpeg import (CONF_MJPEG_URL, CONF_STILL_IMAGE_URL, MjpegCamera)
+from homeassistant.components.mjpeg.camera import (CONF_MJPEG_URL, CONF_STILL_IMAGE_URL, MjpegCamera)
 
 _LOGGER = logging.getLogger(__name__)
 
