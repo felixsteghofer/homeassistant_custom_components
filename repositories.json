@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "projects": [
+    {
+      "id": "sunspec-bridge",
+      "name": "SunSpec Bridge",
+      "repository": "felixsteghofer/homeassistant_sunspec-bridge",
+      "kind": "integration",
+      "domain": "fems_sunspec_bridge",
+      "summary": "Serve existing SunSpec2 inverter readings to FEMS/OpenEMS over Modbus TCP.",
+      "requires": "SunSpec2; a reachable inverter; FEMS/OpenEMS client",
+      "documentation": "docs/sunspec-bridge.md",
+      "hacs_repository": "felixsteghofer/homeassistant_sunspec-bridge"
+    },
+    {
+      "id": "dreame-live-camera",
+      "name": "Dreame Live Camera",
+      "repository": "felixsteghofer/dreame-live-camera",
+      "kind": "integration",
+      "domain": "dreame_live_camera",
+      "summary": "PIN-gated live video from compatible Dreame/MOVA robot vacuums.",
+      "requires": "Configured dreame_vacuum integration; supported camera; camera PIN",
+      "documentation": "docs/dreame-live-camera.md",
+      "hacs_repository": "felixsteghofer/dreame-live-camera"
+    },
+    {
+      "id": "philips-avent",
+      "name": "Philips Avent Baby Monitor",
+      "repository": "felixsteghofer/aventproxy",
+      "kind": "integration",
+      "domain": "philips_avent",
+      "summary": "Baby-monitor video, temperature, night light, lullabies and alerts; includes LAN bridge apps.",
+      "requires": "Compatible Philips Avent monitor; account provisioning; selected bridge app",
+      "documentation": "docs/philips-avent.md",
+      "hacs_repository": "felixsteghofer/aventproxy",
+      "app_repository": "felixsteghofer/aventproxy"
+    },
+    {
+      "id": "bunker-codex",
+      "name": "Bunker Codex",
+      "repository": "felixsteghofer/home-assistant_custom-assistant",
+      "kind": "integration",
+      "domain": "bunker_codex",
+      "summary": "Use an existing Codex HTTPS bridge as a native Home Assistant Assist conversation agent.",
+      "requires": "Existing compatible HTTPS bridge; bridge token; trusted TLS certificate",
+      "documentation": "docs/bunker-codex.md",
+      "hacs_repository": "felixsteghofer/home-assistant_custom-assistant"
+    },
+    {
+      "id": "dahoam-vacuum-card",
+      "name": "Dahoam Vacuum Card",
+      "repository": "felixsteghofer/home-assistant_custom-vacuum-card",
+      "kind": "dashboard",
+      "card_type": "custom:dahoam-vacuum-card",
+      "summary": "Vacuum map, cleaning controls, room selection and dock controls in a compact card.",
+      "requires": "Configured vacuum integration and explicitly selected entities",
+      "documentation": "docs/dahoam-vacuum-card.md",
+      "hacs_repository": "felixsteghofer/home-assistant_custom-vacuum-card"
+    },
+    {
+      "id": "motion-tracker-card",
+      "name": "Motion Tracker Card",
+      "repository": "felixsteghofer/home-assistant_motion-tracker-card",
+      "kind": "dashboard",
+      "card_type": "custom:motion-tracker-card",
+      "summary": "Show recent detections on configurable vector floor plans using HA entities and recorder history.",
+      "requires": "Motion/presence entities or timestamp/event helpers; configured floor geometry",
+      "documentation": "docs/motion-tracker-card.md",
+      "hacs_repository": "felixsteghofer/home-assistant_motion-tracker-card"
+    },
+    {
+      "id": "meinvodafone",
+      "name": "MeinVodafone fork",
+      "repository": "felixsteghofer/homeassistant-meinvodafone",
+      "kind": "reference",
+      "domain": "meinvodafone",
+      "summary": "Reference to the personal fork of the Vodafone Germany contract-usage integration.",
+      "requires": "Vodafone DE account; inspect fork changes/releases before switching source",
+      "documentation": "docs/meinvodafone.md",
+      "upstream_repository": "stickpin/homeassistant-meinvodafone",
+      "hacs_repository": "stickpin/homeassistant-meinvodafone"
+    },
+    {
+      "id": "shinobi",
+      "name": "Shinobi (legacy)",
+      "repository": "felixsteghofer/homeassistant_custom_components",
+      "kind": "legacy",
+      "domain": "shinobi",
+      "summary": "Original YAML-based Shinobi CCTV camera integration retained in this repository.",
+      "requires": "Shinobi API/group keys and MJPEG streams; current HA compatibility unverified",
+      "documentation": "docs/shinobi.md",
+      "source_path": "custom_components/shinobi"
+    }
+  ]
+}
